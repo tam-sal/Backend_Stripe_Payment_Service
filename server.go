@@ -1,12 +1,14 @@
 package main
 
 import (
-	"backend/env"
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
+	"os"
 
 	"github.com/stripe/stripe-go/v74"
 	"github.com/stripe/stripe-go/v74/paymentintent"
@@ -89,7 +91,12 @@ func (h Handlers) handleCreatePaymentIntent(w http.ResponseWriter, req *http.Req
 }
 
 func main() {
-	stripeK := env.GetString("STRIPE_KEY", "888")
+
+	stripeK, exists := os.LookupEnv("STRIPE_KEY")
+	if !exists || stripeK == "" {
+		err := errors.New("invalid Stripe Key")
+		log.Fatal(err)
+	}
 	fmt.Println(stripeK)
 	app := &application{
 		handlers: Handlers{},
